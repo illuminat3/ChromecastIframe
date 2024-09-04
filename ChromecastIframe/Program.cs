@@ -12,7 +12,7 @@ public class Program
     const string NamespaceUri = "urn:x-cast:xyz.illuminat3.cast";
     private static ILogger<Program> Logger = default!;
 
-    public static async Task Main(string[] args)
+    public static async Task Main()
     {
         Logger = LoggerHelper.SetupLogger<Program>();
 
