@@ -8,8 +8,10 @@ namespace ChromecastIframe;
 
 public class Program
 {
-    const string ApplicationId = "0B083724";
-    const string NamespaceUri = "urn:x-cast:xyz.illuminat3.cast";
+    const string ApplicationId = "F7FD2183";
+    const string NamespaceUri = "urn:x-cast:com.boombatower.chromecast-dashboard";
+    const string DeviceName = "";
+    const string Url = "";
     private static ILogger<Program> Logger = default!;
 
     public static async Task Main()
@@ -18,9 +20,8 @@ public class Program
 
         var receivers = await GetReceivers();
 
-        string deviceName = "";
 
-        var receiver = GetReceiverByName(deviceName, receivers);
+        var receiver = GetReceiverByName(DeviceName, receivers);
 
         if (receiver == null)
         {
@@ -28,9 +29,7 @@ public class Program
             return;
         }
 
-        string url = "https://example.com/";
-
-        await SendUrlToChromecast(url, receiver);
+        await SendUrlToChromecast(Url, receiver);
     }
 
     private static async Task<List<ChromecastReceiver>> GetReceivers()
@@ -65,6 +64,7 @@ public class Program
         {
             if (receiver.Name == name)
             {
+                Logger.LogInformation("Device added: {DeviceName}", receiver.Name);
                 return receiver;
             }
         }
@@ -77,10 +77,17 @@ public class Program
         var client = new ChromecastClient();
 
         await client.ConnectChromecast(chromecast);
-        await client.LaunchApplicationAsync(ApplicationId, false);    
+        await client.LaunchApplicationAsync(ApplicationId, false);
 
-        var message = new UrlMessage(url);
+        var sessionId = client.GetChromecastStatus().Application.SessionId;
 
-        await client.SendAsync(Logger, NamespaceUri, message, "receiver-0");
+        var message = new WebMessage
+        {
+            Url = url,
+            Type = "load",
+            SessionId = sessionId
+        };
+
+        await client.SendAsync(Logger, NamespaceUri, message, sessionId);
     }
 }
